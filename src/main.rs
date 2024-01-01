@@ -1,12 +1,14 @@
 mod systems;
 mod ui;
+mod game;
 
 use bevy::{
     prelude::*, window::PresentMode, diagnostic::FrameTimeDiagnosticsPlugin,
 };
 
-use ui::UIPlugin;
-use systems::setup;
+use crate::{ 
+    ui::UIPlugin, systems::setup, game::GamePlugin,
+};
 
 fn main() {
     let window_plugin = WindowPlugin {
@@ -21,6 +23,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(window_plugin))
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
+        .add_plugins(GamePlugin)
         .add_plugins(UIPlugin)
         .add_systems(Startup, setup)
         .run();
