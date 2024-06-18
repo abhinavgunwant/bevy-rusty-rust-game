@@ -6,14 +6,14 @@ pub fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>
 ) {
     commands.spawn(PbrBundle {
-        mesh: meshes.add(shape::Circle::new(400.0).into()),
-        material: materials.add(Color::WHITE.into()),
+        mesh: meshes.add(shape::Circle::new(400.0)),
+        material: materials.add(Color::WHITE),
         ..default()
     });
 
     commands.spawn(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        material: materials.add(Color::RED.into()),
+        material: materials.add(Color::RED),
         transform: Transform::from_xyz(0.0, 0.0, 0.5),
         ..default()
     });

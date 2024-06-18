@@ -5,7 +5,7 @@ use bevy::{ prelude::*, input::mouse::MouseMotion };
 use crate::game::player::{ *, components::Player };
 
 pub fn move_player(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut mouse_er: EventReader<MouseMotion>,
     mut player_query: Query<(&mut Transform, &mut Player), With<Player>>,
     time: Res<Time>,
@@ -16,18 +16,18 @@ pub fn move_player(
 
         let yaw_quat = Quat::from_axis_angle(Vec3::Z, player.yaw - FRAC_PI_2);
 
-        if keyboard_input.pressed(KeyCode::Left)
-            || keyboard_input.pressed(KeyCode::A) {
+        if keyboard_input.pressed(KeyCode::ArrowLeft)
+            || keyboard_input.pressed(KeyCode::KeyA) {
             direction += yaw_quat * -Vec3::Y;
         }
 
-        if keyboard_input.pressed(KeyCode::Right)
-            || keyboard_input.pressed(KeyCode::D) {
+        if keyboard_input.pressed(KeyCode::ArrowRight)
+            || keyboard_input.pressed(KeyCode::KeyD) {
             direction += yaw_quat * Vec3::Y;
         }
 
-        if keyboard_input.pressed(KeyCode::Up)
-            || keyboard_input.pressed(KeyCode::W)
+        if keyboard_input.pressed(KeyCode::ArrowUp)
+            || keyboard_input.pressed(KeyCode::KeyW)
         {
             if NOCLIP {
                 direction += yaw_quat * -Vec3::X + Vec3::new(
@@ -40,8 +40,8 @@ pub fn move_player(
             }
         }
 
-        if keyboard_input.pressed(KeyCode::Down)
-            || keyboard_input.pressed(KeyCode::S) {
+        if keyboard_input.pressed(KeyCode::ArrowDown)
+            || keyboard_input.pressed(KeyCode::KeyS) {
             if NOCLIP {
                 direction += yaw_quat * Vec3::X - Vec3::new(
                     0.0,

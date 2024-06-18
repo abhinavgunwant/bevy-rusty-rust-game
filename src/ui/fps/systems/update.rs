@@ -10,7 +10,7 @@ pub fn update_fps_text(
 ) {
     for mut text in &mut query {
         if let Some(value) = diagnostics
-            .get(FrameTimeDiagnosticsPlugin::FPS)
+            .get(&FrameTimeDiagnosticsPlugin::FPS)
             .and_then(|fps| fps.smoothed())
         {
             text.sections[1].value = format!("{}", value as u16);
