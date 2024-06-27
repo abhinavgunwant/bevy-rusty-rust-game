@@ -6,7 +6,6 @@ use bevy::{
     prelude::*, window::PresentMode, diagnostic::FrameTimeDiagnosticsPlugin,
 };
 use bevy_rapier3d::prelude::*;
-// use bevy_rapier3d::{plugin::{NoUserData, RapierPhysicsPlugin}, render::RapierDebugRenderPlugin};
 
 use crate::{ 
     ui::UIPlugin, systems::setup, game::GamePlugin,
@@ -24,7 +23,6 @@ fn main() {
 
     let mut rapier_config = RapierConfiguration::new(0.0);
     rapier_config.gravity = Vect::new(0.0, 0.0, -9.8);
-
 
     let mut app = App::new();
 

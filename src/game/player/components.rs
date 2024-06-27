@@ -1,5 +1,15 @@
 use bevy::prelude::*;
 
+use std::f32::consts::FRAC_PI_2;
+
+#[derive(Default, PartialEq, Eq, Clone)]
+pub enum MovementType {
+    Crouch,
+    Sprint,
+    #[default]
+    Walk,
+}
+
 #[derive(Component)]
 pub struct Player {
     pub id: u16,
@@ -14,6 +24,7 @@ pub struct Player {
     pub radiation: u8,
     pub ore_boost: u8,
     pub health_boost: u8,
+    pub movement_type: MovementType,
 }
 
 impl Default for Player {
@@ -21,7 +32,7 @@ impl Default for Player {
         Player {
             id: 0,
             name: String::from("Unknown Player"),
-            pitch: 0.0,
+            pitch: FRAC_PI_2,
             yaw: 0.0,
             health: 70,
             food: 64,
@@ -31,6 +42,7 @@ impl Default for Player {
             radiation: 0,
             ore_boost: 0,
             health_boost: 0,
+            movement_type: MovementType::default(),
         }
     }
 }

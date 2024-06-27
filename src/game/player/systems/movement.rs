@@ -1,6 +1,7 @@
 use std::f32::consts::{ PI, FRAC_PI_2 };
 
 use bevy::{ prelude::*, input::mouse::MouseMotion };
+use components::MovementType;
 
 use crate::game::player::{ *, components::Player };
 
@@ -10,8 +11,7 @@ pub fn move_player(
     mut player_query: Query<(&mut Transform, &mut Player), With<Player>>,
     time: Res<Time>,
 ) {
-    if let Ok((mut transform, mut player)) = player_query.get_single_mut() {
-        let mut sprint = false;
+    if let Ok((mut transform, mut player)) = player_query.get_single_mut(){
         let mut direction = Vec3::ZERO;
 
         let yaw_quat = Quat::from_axis_angle(Vec3::Z, player.yaw - FRAC_PI_2);
@@ -53,8 +53,14 @@ pub fn move_player(
             }
         }
 
-        if keyboard_input.pressed(KeyCode::ShiftLeft) {
-            sprint = true;
+        let old_movement_type = player.movement_type.clone();
+
+        if keyboard_input.pressed(KeyCode::ControlLeft) {
+            player.movement_type = MovementType::Crouch;
+        } else if keyboard_input.pressed(KeyCode::ShiftLeft) {
+            player.movement_type = MovementType::Sprint;
+        } else {
+            player.movement_type = MovementType::Walk;
         }
 
         for mouse in mouse_er.read() {
@@ -63,10 +69,30 @@ pub fn move_player(
             player.pitch = player.pitch.clamp(0.0, PI);
         }
 
-        if sprint {
-            transform.translation += direction * PLAYER_RUNNING_SPEED * time.delta_seconds();
-        } else {
-            transform.translation += direction * PLAYER_WALKING_SPEED * time.delta_seconds();
+        match player.movement_type {
+            MovementType::Sprint => {
+                transform.translation += direction * PLAYER_RUNNING_SPEED * time.delta_seconds();
+
+                if old_movement_type == MovementType::Crouch {
+                    transform.translation.z += PLAYER_CROUCH_DELTA;
+                }
+            }
+
+            MovementType::Walk => {
+                transform.translation += direction * PLAYER_WALKING_SPEED * time.delta_seconds();
+
+                if old_movement_type == MovementType::Crouch {
+                    transform.translation.z += PLAYER_CROUCH_DELTA;
+                }
+            }
+
+            MovementType::Crouch => {
+                transform.translation += direction * PLAYER_CROUCH_SPEED * time.delta_seconds();
+
+                if old_movement_type != MovementType::Crouch {
+                    transform.translation.z -= PLAYER_CROUCH_DELTA;
+                }
+            }
         }
 
         transform.rotation = Quat::from_axis_angle(Vec3::Z, player.yaw)

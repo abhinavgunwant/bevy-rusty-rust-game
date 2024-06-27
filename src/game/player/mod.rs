@@ -9,6 +9,8 @@ use crate::{game::player::systems::{
 
 const PLAYER_WALKING_SPEED: f32 = 1.42;
 const PLAYER_RUNNING_SPEED: f32 = 4.16;
+const PLAYER_CROUCH_SPEED: f32 = 0.8;
+const PLAYER_CROUCH_DELTA: f32 = 0.7;
 
 // TODO: make a simpler version so that 1.0 sensitivity = 0.00030 and memoize
 // that somewhere...
