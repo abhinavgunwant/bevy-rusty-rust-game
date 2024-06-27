@@ -5,6 +5,8 @@ mod game;
 use bevy::{
     prelude::*, window::PresentMode, diagnostic::FrameTimeDiagnosticsPlugin,
 };
+use bevy_rapier3d::prelude::*;
+// use bevy_rapier3d::{plugin::{NoUserData, RapierPhysicsPlugin}, render::RapierDebugRenderPlugin};
 
 use crate::{ 
     ui::UIPlugin, systems::setup, game::GamePlugin,
@@ -20,12 +22,23 @@ fn main() {
         ..default()
     };
 
-    App::new()
-        .add_plugins(DefaultPlugins.set(window_plugin))
+    let mut rapier_config = RapierConfiguration::new(0.0);
+    rapier_config.gravity = Vect::new(0.0, 0.0, -9.8);
+
+
+    let mut app = App::new();
+
+    app.add_plugins(DefaultPlugins.set(window_plugin))
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(GamePlugin)
         .add_plugins(UIPlugin)
         .add_systems(Startup, setup)
-        .run();
+        .insert_resource(rapier_config);
+
+    #[cfg(debug_assertions)]
+    app.add_plugins(RapierDebugRenderPlugin::default());
+
+    app.run();
 }
 

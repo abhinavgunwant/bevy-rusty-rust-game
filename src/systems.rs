@@ -1,22 +1,32 @@
 use bevy::{prelude::*, render::{mesh::VertexAttributeValues, render_asset::RenderAssetUsages}};
+use bevy_rapier3d::prelude::*;
 
 pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>
 ) {
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Circle::new(400.0)),
-        material: materials.add(Color::WHITE),
-        ..default()
-    });
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(400.0, 400.0, 0.1)),
+            material: materials.add(Color::WHITE),
+            transform: Transform::from_xyz(0.0, 0.0, -0.05),
+            ..default()
+        },
+        Collider::cuboid(400.0, 400.0, 0.1)
+    ));
 
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
-        material: materials.add(Color::RED),
-        transform: Transform::from_xyz(0.0, 0.0, 0.5),
-        ..default()
-    });
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
+            material: materials.add(Color::RED),
+            transform: Transform::from_xyz(0.0, 0.0, 0.5),
+            ..default()
+        },
+        RigidBody::Dynamic,
+        Collider::cuboid(0.5, 0.5, 0.5),
+        Restitution::coefficient(0.7),
+    ));
 
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
