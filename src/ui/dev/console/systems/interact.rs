@@ -30,34 +30,23 @@ pub fn input_text(
                         continue;
                     }
 
-                    // console_state.text.push_str(&input);
                     console_text_line.text.push_str(&input);
                     // println!("{} pressed: {}", input, console_text_line.text);
                 }
 
                 Key::Backspace => {
-                    // console_state.text.pop();
                     console_text_line.text.pop();
                 }
 
                 Key::Space => {
-                    // console_state.text.push(' ');
                     console_text_line.text.push(' ');
                 }
 
                 // Interpret the command here
                 Key::Enter => {
-                    // if console_state.text.eq("quit") || console_state.text.eq("exit") {
-
-                    // Finally, when command has been processed:
-                    // let console_txt = console_state.text.clone();
-                    // console_state.history.push(console_txt);
-                    // console_state.text = String::default();
-
                     command_ew.send(ConsoleCommandEvent {
                         command: console_text_line.text.clone()
                     });
-                    // console_history.text_vec.push();
                     console_text_line.text = String::default();
                 }
 
@@ -67,12 +56,9 @@ pub fn input_text(
 
         text.sections[0].value = console_text_line.text.clone();
     }
-
-    // if let Ok(mut text) = text_query.get_single_mut() {
-    //     text.sections[0].value = console_state.text.clone();
-    // }
 }
 
+/// Console command processing happens here...
 pub fn process_command(
     mut command_er: EventReader<ConsoleCommandEvent>,
     mut exit_event_writer: EventWriter<AppExit>,
