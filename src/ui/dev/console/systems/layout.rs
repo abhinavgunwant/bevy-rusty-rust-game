@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 use crate::ui::dev::console::{
-    components::{ Console, ConsoleTextLine, ConsoleHistory },
-    CONSOLE_HEIGHT, CONSOLE_TITLE_HEIGHT, CONSOLE_TEXT_LINE_HEIGHT,
+    components::{ Console, ConsoleHistory, ConsoleTextLine, Scrollable },
+    CONSOLE_HEIGHT, CONSOLE_TEXT_LINE_HEIGHT, CONSOLE_TITLE_HEIGHT,
 };
 
 pub fn spawn_console(mut commands: Commands) {
@@ -56,6 +56,7 @@ pub fn spawn_console(mut commands: Commands) {
             ));
         });
 
+        // Command history
         parent.spawn((
             NodeBundle {
                 background_color: Color::rgba(0.0, 0.0, 0.0, 0.9).into(),
@@ -63,27 +64,25 @@ pub fn spawn_console(mut commands: Commands) {
                 style: console_history_style,
                 ..default()
             },
+            Scrollable { pos: 0.0 },
         )).with_children(|history| {
-            let text_style = TextStyle {
-                font_size: 24.0,
-                color: Color::rgba(0.9, 0.9, 0.9, 1.0).into(),
-                ..default()
-            };
-
             history.spawn((
                 TextBundle {
                     text: Text {
-                        sections: vec![
-                            TextSection::new("", text_style.clone()),
-                        ],
+                        sections: vec![],
+                        ..default()
+                    },
+                    style: Style {
+                        flex_direction: FlexDirection::Column,
                         ..default()
                     },
                     ..default()
                 },
-                ConsoleHistory,
+                ConsoleHistory { text_vec: vec![] },
             ));
         });
 
+        // Command prompt
         parent.spawn((
             NodeBundle {
                 background_color: Color::rgba(0.0, 0.0, 0.0, 1.0).into(),
@@ -109,7 +108,7 @@ pub fn spawn_console(mut commands: Commands) {
                     },
                     ..default()
                 },
-                ConsoleTextLine,
+                ConsoleTextLine { text: String::default() },
             ));
         });
     });
@@ -122,5 +121,7 @@ pub fn despawn_console(
     if let Ok(console_entity) = console_query.get_single() {
         commands.entity(console_entity).despawn_recursive();
     }
+
+    // TODO: store the command history in a file or a Local<...> here...
 }
 

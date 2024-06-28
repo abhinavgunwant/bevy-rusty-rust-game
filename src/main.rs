@@ -8,7 +8,8 @@ use bevy::{
 use bevy_rapier3d::prelude::*;
 
 use crate::{ 
-    ui::UIPlugin, systems::setup, game::GamePlugin,
+    systems::setup, game::GamePlugin,
+    ui::{ UIPlugin, dev::console::events::ConsoleCommandEvent },
 };
 
 fn main() {
@@ -32,6 +33,7 @@ fn main() {
         .add_plugins(GamePlugin)
         .add_plugins(UIPlugin)
         .add_systems(Startup, setup)
+        .add_event::<ConsoleCommandEvent>()
         .insert_resource(rapier_config);
 
     #[cfg(debug_assertions)]

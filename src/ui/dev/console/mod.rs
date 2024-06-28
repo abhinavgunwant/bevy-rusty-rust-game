@@ -1,11 +1,12 @@
 /// Developer console module
 pub mod systems;
 pub mod components;
+pub mod events;
 
 use bevy::prelude::*;
 use systems::{
     toggle::toggle_console,
-    interact::input_text,
+    interact::{ input_text, process_command },
     layout::{ spawn_console, despawn_console },
 };
 
@@ -23,7 +24,9 @@ impl Plugin for ConsolePlugin {
                 Update,
                 (
                     toggle_console,
-                    input_text.run_if(in_state(ConsoleToggleState::Shown))
+                    (input_text, process_command).run_if(
+                        in_state(ConsoleToggleState::Shown)
+                    )
                 )
             )
             .add_systems(OnEnter(ConsoleToggleState::Shown), spawn_console)
@@ -36,11 +39,5 @@ pub enum ConsoleToggleState {
     #[default]
     Shown,
     Hidden,
-}
-
-#[derive(Default)]
-pub struct ConsoleState {
-    text: String,
-    history: Vec<String>,
 }
 
