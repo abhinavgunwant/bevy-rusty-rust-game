@@ -6,16 +6,18 @@ use crate::ui::dev::console::{
 };
 
 pub fn spawn_console(mut commands: Commands) {
-    let mut console_backdrop_style = Style::default();
-
-    console_backdrop_style.width = Val::Percent(100.0);
-    console_backdrop_style.height = Val::Px(CONSOLE_HEIGHT);
-    console_backdrop_style.flex_direction = FlexDirection::Column;
+    let console_backdrop_style = Style {
+        width: Val::Percent(100.0),
+        height: Val::Px(CONSOLE_HEIGHT),
+        flex_direction: FlexDirection::Column,
+        ..default()
+    };
 
     let mut console_history_style = console_backdrop_style.clone();
     console_history_style.height = Val::Px(
         CONSOLE_HEIGHT - CONSOLE_TEXT_LINE_HEIGHT - CONSOLE_TITLE_HEIGHT
     );
+    console_history_style.overflow = Overflow::clip_y();
 
     commands.spawn((
         NodeBundle {
@@ -32,10 +34,12 @@ pub fn spawn_console(mut commands: Commands) {
             ..default()
         };
 
-        let mut title_style = Style::default();
-        title_style.justify_content = JustifyContent::Center;
-        title_style.align_items = AlignItems::Center;
-        title_style.height = Val::Px(CONSOLE_TITLE_HEIGHT);
+        let title_style = Style {
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            height: Val::Px(CONSOLE_TITLE_HEIGHT),
+            ..default()
+        };
 
         parent.spawn(NodeBundle {
             background_color: Color::rgba(0.0, 0.0, 0.0, 1.0).into(),
@@ -78,7 +82,7 @@ pub fn spawn_console(mut commands: Commands) {
                     },
                     ..default()
                 },
-                ConsoleHistory { text_vec: vec![] },
+                ConsoleHistory { text_vec: vec![], position: 0.0 },
             ));
         });
 

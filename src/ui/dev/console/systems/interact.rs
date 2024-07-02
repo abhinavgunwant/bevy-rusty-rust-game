@@ -5,7 +5,8 @@ use bevy::{
 };
 
 use crate::ui::dev::console::{
-    components::{ConsoleHistory, ConsoleTextLine}, events::ConsoleCommandEvent,
+    components::{ConsoleHistory, ConsoleTextLine},
+    events::ConsoleCommandEvent,
 };
 
 pub fn input_text(
@@ -31,7 +32,6 @@ pub fn input_text(
                     }
 
                     console_text_line.text.push_str(&input);
-                    // println!("{} pressed: {}", input, console_text_line.text);
                 }
 
                 Key::Backspace => {
@@ -63,7 +63,7 @@ pub fn process_command(
     mut command_er: EventReader<ConsoleCommandEvent>,
     mut exit_event_writer: EventWriter<AppExit>,
     mut history_query: Query<
-        (&mut Text, &mut ConsoleHistory),
+        (&mut Text, &mut ConsoleHistory, &mut Style),
         With<ConsoleHistory>
     >,
 ) {
@@ -80,12 +80,17 @@ pub fn process_command(
             }
         }
 
-        if let Ok((mut text, mut console_text_history)) = history_query.get_single_mut() {
+        if let Ok((mut text, mut console_text_history, mut style)) = history_query.get_single_mut() {
             console_text_history.text_vec.push(e.command.clone());
             text.sections.push(TextSection::new(
                 format!("\n{}", e.command),
                 TextStyle { font_size: 20.0, ..default() },
             ));
+
+            if console_text_history.text_vec.len() > 12 {
+                console_text_history.position -= 20.0;
+                style.top = Val::Px(console_text_history.position);
+            }
         }
     }
 }
