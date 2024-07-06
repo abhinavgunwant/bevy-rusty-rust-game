@@ -47,3 +47,6 @@ impl Default for Player {
     }
 }
 
+#[derive(Component)]
+pub struct PlayerCamera;
+
