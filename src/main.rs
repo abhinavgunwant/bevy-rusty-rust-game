@@ -6,6 +6,7 @@ use bevy::{
     prelude::*, window::PresentMode, diagnostic::FrameTimeDiagnosticsPlugin,
 };
 use bevy_rapier3d::prelude::*;
+use game::item::events::SpawnItemEvent;
 
 use crate::{ 
     systems::setup, game::GamePlugin,
@@ -34,6 +35,7 @@ fn main() {
         .add_plugins(UIPlugin)
         .add_systems(Startup, setup)
         .add_event::<ConsoleCommandEvent>()
+        .add_event::<SpawnItemEvent>()
         .insert_resource(rapier_config);
 
     #[cfg(debug_assertions)]
