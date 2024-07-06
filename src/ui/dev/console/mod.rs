@@ -6,7 +6,7 @@ pub mod events;
 use bevy::prelude::*;
 use systems::{
     toggle::toggle_console,
-    interact::{ input_text, process_command },
+    interact::{ input_text, process_command, mouse_scroll },
     layout::{ spawn_console, despawn_console },
 };
 
@@ -24,7 +24,7 @@ impl Plugin for ConsolePlugin {
                 Update,
                 (
                     toggle_console,
-                    (input_text, process_command).run_if(
+                    (input_text, process_command, mouse_scroll).run_if(
                         in_state(ConsoleToggleState::Shown)
                     )
                 )

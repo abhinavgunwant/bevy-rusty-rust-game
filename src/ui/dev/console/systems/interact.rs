@@ -1,7 +1,5 @@
 use bevy::{
-    prelude::*,
-    app::AppExit,
-    input::{ keyboard::{ Key, KeyboardInput }, ButtonState },
+    app::AppExit, input::{ keyboard::{ Key, KeyboardInput }, mouse::{MouseScrollUnit, MouseWheel}, ButtonState }, prelude::*
 };
 
 use crate::ui::dev::console::{
@@ -91,6 +89,35 @@ pub fn process_command(
                 console_text_history.position -= 20.0;
                 style.top = Val::Px(console_text_history.position);
             }
+        }
+    }
+}
+
+pub fn mouse_scroll(
+    mut mouse_wheel_events: EventReader<MouseWheel>,
+    mut history_query: Query<
+        (&mut ConsoleHistory, &mut Style, &Parent, &Node),
+        With<ConsoleHistory>
+    >,
+    query_node: Query<&Node>,
+) {
+    for e in mouse_wheel_events.read() {
+        for (mut console_history, mut style, parent, node) in &mut history_query {
+            let dy = match e.unit {
+                MouseScrollUnit::Line => e.y * 80.0,
+                MouseScrollUnit::Pixel => e.y,
+            };
+
+            let node_height = node.size().y;
+            let container_height = query_node.get(parent.get()).unwrap().size().y;
+
+            let max_scroll = (node_height - container_height).max(0.0);
+
+            console_history.position += dy;
+            console_history.position = console_history
+                .position.clamp(-max_scroll, 0.0);
+
+            style.top = Val::Px(console_history.position);
         }
     }
 }
