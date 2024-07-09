@@ -38,74 +38,141 @@ pub fn interpret(
     let parser = Parser::new(source);
     let ast = parser.parse();
 
-    println!("interpreting {}", ast);
+    // println!("interpreting {}", ast);
 
     match ast {
         AST::Command(command_ast) => {
-            println!("interpreting command");
             match command_ast.name.as_str() {
                 "spawn" => {
-                    println!("Behold! the spawn command!");
-                    if command_ast.identifier.eq("box") {
-                        if command_ast.parameters.is_empty() {
-                            spawn_item_ew.send(SpawnItemEvent(
-                                ItemToSpawn::GeometryCube(
-                                    0.0, 0.0, 0.0, 1.0, 1.0, 1.0
-                                )
-                            ));
-                        } else if command_ast.parameters.len() == 3 {
-                            let mut error = false;
-
-                            let params = match get_f32_param_values(
-                                command_ast.parameters
-                            ) {
-                                Ok(p) => p,
-                                Err(err_text) => {
-                                    println!("> spawn -> box: {}", err_text);
-                                    error = true;
-                                    vec![]
-                                }
-                            };
-
-                            if !error {
+                    match command_ast.identifier.as_str() {
+                        "box" => {
+                            if command_ast.parameters.is_empty() {
                                 spawn_item_ew.send(SpawnItemEvent(
                                     ItemToSpawn::GeometryCube(
-                                        params[0],
-                                        params[1],
-                                        params[2],
-                                        1.0,
-                                        1.0,
-                                        1.0
+                                        0.0, 0.0, 0.0, 1.0, 1.0, 1.0
                                     )
                                 ));
-                            }
-                        } else if command_ast.parameters.len() == 6 {
-                            let mut error = false;
-                            let params = match get_f32_param_values(
-                                command_ast.parameters
-                            ) {
-                                Ok(p) => p,
-                                Err(err_text) => {
-                                    println!("> spawn -> box: {}", err_text);
-                                    error = true;
-                                    vec![]
-                                }
-                            };
+                            } else if command_ast.parameters.len() == 3 {
+                                let mut error = false;
 
-                            if !error {
+                                let params = match get_f32_param_values(
+                                    command_ast.parameters
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> box: {}", err_text);
+                                        error = true;
+                                        vec![]
+                                    }
+                                };
+
+                                if !error {
+                                    spawn_item_ew.send(SpawnItemEvent(
+                                        ItemToSpawn::GeometryCube(
+                                            params[0],
+                                            params[1],
+                                            params[2],
+                                            1.0,
+                                            1.0,
+                                            1.0
+                                        )
+                                    ));
+                                }
+                            } else if command_ast.parameters.len() == 6 {
+                                let mut error = false;
+                                let params = match get_f32_param_values(
+                                    command_ast.parameters
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> box: {}", err_text);
+                                        error = true;
+                                        vec![]
+                                    }
+                                };
+
+                                if !error {
+                                    spawn_item_ew.send(SpawnItemEvent(
+                                        ItemToSpawn::GeometryCube(
+                                            params[0],
+                                            params[1],
+                                            params[2],
+                                            params[3],
+                                            params[4],
+                                            params[5],
+                                        )
+                                    ));
+                                }
+                            } else {
+                                println!("> spawn -> box: unexpected number of parameters");
+                            }
+                        }
+
+                        "sphere" => {
+                            if command_ast.parameters.is_empty() {
                                 spawn_item_ew.send(SpawnItemEvent(
-                                    ItemToSpawn::GeometryCube(
-                                        params[0],
-                                        params[1],
-                                        params[2],
-                                        params[3],
-                                        params[4],
-                                        params[5],
+                                    ItemToSpawn::GeometrySphere(
+                                        0.0, 0.0, 0.0, 1.0
                                     )
                                 ));
+                            } else if command_ast.parameters.len() == 3 {
+                                let mut error = false;
+
+                                let params = match get_f32_param_values(
+                                    command_ast.parameters
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> sphere: {}", err_text);
+                                        error = true;
+                                        vec![]
+                                    }
+                                };
+
+                                if !error {
+                                    spawn_item_ew.send(SpawnItemEvent(
+                                        ItemToSpawn::GeometrySphere(
+                                            params[0],
+                                            params[1],
+                                            params[2],
+                                            1.0,
+                                        )
+                                    ));
+                                }
+                            } else if command_ast.parameters.len() == 4 {
+                                let mut error = false;
+
+                                let params = match get_f32_param_values(
+                                    command_ast.parameters
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> sphere: {}", err_text);
+                                        error = true;
+                                        vec![]
+                                    }
+                                };
+
+                                if !error {
+                                    spawn_item_ew.send(SpawnItemEvent(
+                                        ItemToSpawn::GeometrySphere(
+                                            params[0],
+                                            params[1],
+                                            params[2],
+                                            params[3],
+                                        )
+                                    ));
+                                }
+                            } else {
+                                println!("> spawn -> sphere: unexpected number of parameters");
                             }
-                        } else {
-                            println!("> spawn -> box: unexpected number of parameters");
+                        }
+
+                        _ => {
+                            println!(
+                                "> spawn: invalid primitive \"{}\"",
+                                command_ast.identifier
+                            );
                         }
                     }
                 }
@@ -120,7 +187,7 @@ pub fn interpret(
             }
         }
 
-        AST::Assignment(assignment_ast) => {
+        AST::Assignment(_assignment_ast) => {
             // TODO: Implement!
         }
 

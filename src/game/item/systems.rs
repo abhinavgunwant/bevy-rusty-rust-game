@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use rand::{ Rng, thread_rng };
 
-use super::{components::GeometryCube, events::{ItemToSpawn, SpawnItemEvent}};
+use super::{
+    components::{ GeometryCube, GeometrySphere },
+    events::{ItemToSpawn, SpawnItemEvent}
+};
 
 fn random_color() -> Color {
     let mut rng = thread_rng();
@@ -31,7 +34,7 @@ pub fn spawn_item(
                         transform: Transform::from_xyz(
                             x.to_owned(),
                             y.to_owned(),
-                            z.to_owned()
+                            z.to_owned(),
                         ),
                         ..default()
                     },
@@ -41,7 +44,26 @@ pub fn spawn_item(
                         depth.to_owned()/2.0,
                         height.to_owned()/2.0,
                     ),
-                    Restitution::coefficient(0.6),
+                    Restitution::coefficient(0.5),
+                ));
+            }
+
+            ItemToSpawn::GeometrySphere(x, y, z, r) => {
+                commands.spawn((
+                    GeometrySphere,
+                    PbrBundle {
+                        mesh: meshes.add(Sphere::new(r)),
+                        material: materials.add(random_color()),
+                        transform: Transform::from_xyz(
+                            x.to_owned(),
+                            y.to_owned(),
+                            z.to_owned(),
+                        ),
+                        ..default()
+                    },
+                    RigidBody::Dynamic,
+                    Collider::ball(r),
+                    Restitution::coefficient(0.5),
                 ));
             }
         }
