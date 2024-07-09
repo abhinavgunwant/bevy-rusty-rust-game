@@ -2,15 +2,129 @@ use bevy::{
     app::AppExit, input::{ keyboard::{ Key, KeyboardInput }, mouse::{MouseScrollUnit, MouseWheel}, ButtonState }, prelude::*
 };
 
-use crate::{game::item::events::{ SpawnItemEvent, ItemToSpawn }, ui::dev::console::{
-    components::{ConsoleHistory, ConsoleTextLine},
-    events::ConsoleCommandEvent,
-}};
+use crate::{
+    game::item::events::{ SpawnItemEvent, ItemToSpawn },
+    ui::dev::console::{
+        components::{ConsoleHistory, ConsoleTextLine},
+        events::ConsoleCommandEvent,
+    },
+    lang::{ parser::Parser, types::{ AST, Literal } },
+};
 
-pub fn parse_arg<T: std::str::FromStr>(s: &str, default: T) -> T {
-    match s.parse::<T>() {
-        Ok(res) => res,
-        Err(_) => default,
+/// Gets f32 vector from the command parameter literals
+pub fn get_f32_param_values(params: Vec<Literal>) -> Result<Vec<f32>, String> {
+    let mut result = vec![];
+
+    for (indx, param) in params.iter().enumerate() {
+        match param {
+            Literal::Number(num) => { result.push(num.clone()); }
+            _ => {
+                return Err(format!(
+                    "Unexpected value, expecting number at position: {}",
+                    indx,
+                ));
+            }
+        }
+    }
+
+    Ok(result)
+}
+
+pub fn interpret(
+    source: String,
+    exit_event_writer: &mut EventWriter<AppExit>,
+    spawn_item_ew: &mut EventWriter<SpawnItemEvent>,
+) {
+    let parser = Parser::new(source);
+    let ast = parser.parse();
+
+    println!("interpreting {}", ast);
+
+    match ast {
+        AST::Command(command_ast) => {
+            println!("interpreting command");
+            match command_ast.name.as_str() {
+                "spawn" => {
+                    println!("Behold! the spawn command!");
+                    if command_ast.identifier.eq("box") {
+                        if command_ast.parameters.is_empty() {
+                            spawn_item_ew.send(SpawnItemEvent(
+                                ItemToSpawn::GeometryCube(
+                                    0.0, 0.0, 0.0, 1.0, 1.0, 1.0
+                                )
+                            ));
+                        } else if command_ast.parameters.len() == 3 {
+                            let mut error = false;
+
+                            let params = match get_f32_param_values(
+                                command_ast.parameters
+                            ) {
+                                Ok(p) => p,
+                                Err(err_text) => {
+                                    println!("> spawn -> box: {}", err_text);
+                                    error = true;
+                                    vec![]
+                                }
+                            };
+
+                            if !error {
+                                spawn_item_ew.send(SpawnItemEvent(
+                                    ItemToSpawn::GeometryCube(
+                                        params[0],
+                                        params[1],
+                                        params[2],
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    )
+                                ));
+                            }
+                        } else if command_ast.parameters.len() == 6 {
+                            let mut error = false;
+                            let params = match get_f32_param_values(
+                                command_ast.parameters
+                            ) {
+                                Ok(p) => p,
+                                Err(err_text) => {
+                                    println!("> spawn -> box: {}", err_text);
+                                    error = true;
+                                    vec![]
+                                }
+                            };
+
+                            if !error {
+                                spawn_item_ew.send(SpawnItemEvent(
+                                    ItemToSpawn::GeometryCube(
+                                        params[0],
+                                        params[1],
+                                        params[2],
+                                        params[3],
+                                        params[4],
+                                        params[5],
+                                    )
+                                ));
+                            }
+                        } else {
+                            println!("> spawn -> box: unexpected number of parameters");
+                        }
+                    }
+                }
+
+                "quit" => {
+                    exit_event_writer.send(AppExit);
+                }
+
+                _ => {
+                    println!("> Unknown command: {}", command_ast.name);
+                }
+            }
+        }
+
+        AST::Assignment(assignment_ast) => {
+            // TODO: Implement!
+        }
+
+        AST::None => {},
     }
 }
 
@@ -63,7 +177,7 @@ pub fn input_text(
     }
 }
 
-/// Console command processing happens here...
+/// Console command processing system
 pub fn process_command(
     mut command_er: EventReader<ConsoleCommandEvent>,
     mut exit_event_writer: EventWriter<AppExit>,
@@ -71,51 +185,12 @@ pub fn process_command(
         (&mut Text, &mut ConsoleHistory, &mut Style),
         With<ConsoleHistory>
     >,
-    mut spawn_item_er: EventWriter<SpawnItemEvent>,
+    mut spawn_item_ew: EventWriter<SpawnItemEvent>,
 ) {
     for e in command_er.read() {
-        if e.command.eq("quit") || e.command.eq("exit") {
-            exit_event_writer.send(AppExit);
-        }
-
-        let command_pairs = e.command.split(" ").collect::<Vec<&str>>();
-
-        if command_pairs.len() >= 2 {
-            if command_pairs[0].eq("spawn") && command_pairs[1].eq("cube"){
-                println!("Spawning cube");
-
-                if command_pairs.len() >= 5 {
-                    let x = parse_arg::<f32>(command_pairs[2], 0.0);
-                    let y = parse_arg::<f32>(command_pairs[3], 0.0);
-                    let z = parse_arg::<f32>(command_pairs[4], 0.5);
-
-                    if command_pairs.len() == 8 {
-                        let w = parse_arg::<f32>(command_pairs[5], 1.0);
-                        let d = parse_arg::<f32>(command_pairs[6], 1.0);
-                        let h = parse_arg::<f32>(command_pairs[7], 1.0);
-
-                        println!(
-                            "Spawning cube: ({}, {}, {}) (w:{}, d:{}, h:{})",
-                            x, y, z, w, d, h,
-                        );
-
-                        spawn_item_er.send(SpawnItemEvent(
-                            ItemToSpawn::GeometryCube(x, y, z, w, d, h)
-                        ));
-
-                        continue;
-                    }
-
-                    spawn_item_er.send(SpawnItemEvent(
-                        ItemToSpawn::GeometryCube(x, y, z, 1.0, 1.0, 1.0)
-                    ));
-                } else {
-                    spawn_item_er.send(SpawnItemEvent(
-                        ItemToSpawn::GeometryCube(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
-                    ));
-                }
-            }
-        }
+        interpret(
+            e.command.clone(), &mut exit_event_writer, &mut spawn_item_ew,
+        );
 
         if let Ok((mut text, mut console_text_history, mut style)) = history_query.get_single_mut() {
             console_text_history.text_vec.push(e.command.clone());

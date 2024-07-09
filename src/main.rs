@@ -1,6 +1,7 @@
 mod systems;
 mod ui;
 mod game;
+mod lang;
 
 use bevy::{
     prelude::*, window::PresentMode, diagnostic::FrameTimeDiagnosticsPlugin,
