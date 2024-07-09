@@ -5,7 +5,10 @@ pub enum ItemToSpawn {
     GeometryCube(f32, f32, f32, f32, f32, f32),
 
     /// Spawn a sphere with a radius (x, y, z, radius)
-    GeometrySphere(f32, f32, f32, f32)
+    GeometrySphere(f32, f32, f32, f32),
+
+    /// GLB file
+    File(f32, f32, f32, String)
 }
 
 #[derive(Event)]

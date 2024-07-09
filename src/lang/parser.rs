@@ -108,7 +108,8 @@ impl Parser {
                     }
 
                     // For now, accepting only numbers as parameters!
-                    if self.peek().token_type == TokenType::Number {
+                    if self.peek().token_type == TokenType::Number 
+                        || self.peek().token_type == TokenType::STRING {
                         parameters.push(self.peek().literal);
                     }
 

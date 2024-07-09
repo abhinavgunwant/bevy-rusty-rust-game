@@ -71,7 +71,8 @@ impl Scanner {
         self.add_token_with_literal(
             TokenType::STRING,
             Literal::String(
-                self.source.chars().skip(self.start + 1).take(self.current - 1)
+                self.source.chars().skip(self.start + 1)
+                    .take(self.current - self.start - 2)
                     .collect()
             ),
         );

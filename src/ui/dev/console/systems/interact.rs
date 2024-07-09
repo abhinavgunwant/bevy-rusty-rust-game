@@ -7,28 +7,13 @@ use crate::{
     ui::dev::console::{
         components::{ConsoleHistory, ConsoleTextLine},
         events::ConsoleCommandEvent,
+        systems::utils::{
+            get_f32_param_values, get_string_param_values,
+            get_string_param_value, get_f32_param_value,
+        },
     },
     lang::{ parser::Parser, types::{ AST, Literal } },
 };
-
-/// Gets f32 vector from the command parameter literals
-pub fn get_f32_param_values(params: Vec<Literal>) -> Result<Vec<f32>, String> {
-    let mut result = vec![];
-
-    for (indx, param) in params.iter().enumerate() {
-        match param {
-            Literal::Number(num) => { result.push(num.clone()); }
-            _ => {
-                return Err(format!(
-                    "Unexpected value, expecting number at position: {}",
-                    indx,
-                ));
-            }
-        }
-    }
-
-    Ok(result)
-}
 
 pub fn interpret(
     source: String,
@@ -38,7 +23,7 @@ pub fn interpret(
     let parser = Parser::new(source);
     let ast = parser.parse();
 
-    // println!("interpreting {}", ast);
+    println!("interpreting {}", ast);
 
     match ast {
         AST::Command(command_ast) => {
@@ -165,6 +150,95 @@ pub fn interpret(
                                 }
                             } else {
                                 println!("> spawn -> sphere: unexpected number of parameters");
+                            }
+                        }
+
+                        "file" => {
+                            if command_ast.parameters.len() == 1 {
+                                let mut error = false;
+
+                                let params = match get_string_param_values(
+                                    command_ast.parameters
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> file: {}", err_text);
+                                        error = true;
+                                        vec![]
+                                    }
+                                };
+
+                                if !error {
+                                    spawn_item_ew.send(SpawnItemEvent(
+                                        ItemToSpawn::File(
+                                            0.0, 0.0, 0.0,
+                                            params[0].clone()
+                                        )
+                                    ));
+                                }
+                            } else if command_ast.parameters.len() == 4 {
+                                let mut error = false;
+
+                                let param0 = match get_f32_param_value(
+                                    &command_ast.parameters,
+                                    0
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> file: {}", err_text);
+                                        error = true;
+                                        0.0
+                                    }
+                                };
+
+                                let param1 = match get_f32_param_value(
+                                    &command_ast.parameters,
+                                    1
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> file: {}", err_text);
+                                        error = true;
+                                        0.0
+                                    }
+                                };
+
+                                let param2 = match get_f32_param_value(
+                                    &command_ast.parameters,
+                                    2
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> file: {}", err_text);
+                                        error = true;
+                                        0.0
+                                    }
+                                };
+
+                                let param3 = match get_string_param_value(
+                                    &command_ast.parameters,
+                                    3
+                                ) {
+                                    Ok(p) => p,
+                                    Err(err_text) => {
+                                        println!("> spawn -> file: {}", err_text);
+                                        error = true;
+                                        String::default()
+                                    }
+                                };
+
+                                if !error {
+                                    spawn_item_ew.send(SpawnItemEvent(
+                                        ItemToSpawn::File(
+                                            param0,
+                                            param1,
+                                            param2,
+                                            param3,
+                                        )
+                                    ));
+                                }
+                            } else {
+                                println!("> spawn -> file: file name not present");
                             }
                         }
 
