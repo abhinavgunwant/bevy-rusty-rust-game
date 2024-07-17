@@ -1,10 +1,13 @@
 use bevy::prelude::*;
 
-use std::{fs::{ metadata, File, write, create_dir }, io::Read};
+use std::{ fs::{ File, write, create_dir }, io::Read, path::Path };
 
-use crate::ui::dev::console::{
-    components::{ Console, ConsoleHistory, ConsoleTextLine, Scrollable },
-    CONSOLE_HEIGHT, CONSOLE_TEXT_LINE_HEIGHT, CONSOLE_TITLE_HEIGHT,
+use crate::{
+    CONSOLE_FILE,
+    ui::dev::console::{
+        components::{ Console, ConsoleHistory, ConsoleTextLine, Scrollable },
+        CONSOLE_HEIGHT, CONSOLE_TEXT_LINE_HEIGHT, CONSOLE_TITLE_HEIGHT,
+    },
 };
 
 pub fn spawn_console(mut commands: Commands) {
@@ -23,28 +26,14 @@ pub fn spawn_console(mut commands: Commands) {
 
     let mut history_lines: Vec<String> = vec![];
 
-    match metadata("logs/console.log") {
-        Ok(_) => {
-            match File::open("logs/console.log") {
-                Ok(mut file) => {
-                    let mut content: String = String::default();
+    if Path::new(CONSOLE_FILE).exists() {
+        if let Ok(mut file) = File::open(CONSOLE_FILE) {
+            let mut content: String = String::default();
 
-                    match file.read_to_string(&mut content) {
-                        Ok(_) => {
-                            history_lines = content.lines()
-                                .map(|s| s.to_string()).collect();
-                        }
-                        Err(_) => {}
-                    };
-                }
-                Err(_) => {
-                    println!("Could not read logs file");
-                }
+            if let Ok(_) = file.read_to_string(&mut content) {
+                history_lines = content.lines().map(|s| s.to_string())
+                        .collect();
             }
-        }
-
-        Err(_) => {
-            println!("Could not open logs file");
         }
     }
 
@@ -175,9 +164,8 @@ pub fn despawn_console(
     console_hist_query: Query<&mut ConsoleHistory, With<ConsoleHistory>>,
 ) {
     if let Ok(console_history) = console_hist_query.get_single() {
-        match metadata("logs/console.log") {
-            Ok(_) => {}
-            Err(_) => {
+        if !Path::new(CONSOLE_FILE).exists() {
+            if !Path::new("./logs/").exists() {
                 match create_dir("logs") {
                     Ok(_) => {
                         println!("Created logs directory");
@@ -189,7 +177,7 @@ pub fn despawn_console(
             }
         }
 
-        match write("logs/console.log", console_history.text_vec.join("\n")) {
+        match write(CONSOLE_FILE, console_history.text_vec.join("\n")) {
             Ok(_) => {}
             Err(e) => {
                 println!("could not write console log to file: {}", e);

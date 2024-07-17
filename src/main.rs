@@ -14,6 +14,8 @@ use crate::{
     ui::{ UIPlugin, dev::console::events::ConsoleCommandEvent },
 };
 
+const CONSOLE_FILE: &str = "logs/console.log";
+
 fn main() {
     let window_plugin = WindowPlugin {
         primary_window: Some(Window {
