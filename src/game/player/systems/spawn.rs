@@ -21,6 +21,7 @@ pub fn spawn_player(mut commands: Commands) {
             PlayerCamera,
             Camera3dBundle { transform: transform_camera, ..default() },
         ));
-    });
+    })
+    .insert(LockedAxes::ROTATION_LOCKED);
 }
 
