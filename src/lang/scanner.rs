@@ -89,6 +89,10 @@ impl Scanner {
     }
 
     fn number(&mut self) {
+        if self.peek() == '-' {
+            self.advance();
+        }
+
         while self.is_digit(self.peek()) {
             self.advance();
         }
@@ -190,6 +194,11 @@ impl Scanner {
             '"' => { self.string(); }
             '\n' => { self.line += 1; self.col = 0; }
             '\r' | ' ' | '\t' => {}
+            '-' => {
+                if self.is_digit(self.peek()) {
+                    self.number();
+                }
+            }
 
             _ => {
                 if self.is_digit(character) {
