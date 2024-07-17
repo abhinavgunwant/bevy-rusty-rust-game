@@ -72,20 +72,25 @@ pub fn process_command(
     mut spawn_item_ew: EventWriter<SpawnItemEvent>,
 ) {
     for e in command_er.read() {
-        interpret(
-            e.command.clone(), &mut exit_event_writer, &mut spawn_item_ew,
-        );
+        if let Ok((mut text, mut console_text_history, mut style))
+            = history_query.get_single_mut()
+        {
+            interpret(
+                &mut text, &mut console_text_history, &mut style,
+                e.command.clone(), &mut exit_event_writer, &mut spawn_item_ew,
+            );
 
-        if let Ok((mut text, mut console_text_history, mut style)) = history_query.get_single_mut() {
-            console_text_history.text_vec.push(e.command.clone());
-            text.sections.push(TextSection::new(
-                format!("\n{}", e.command),
-                TextStyle { font_size: 20.0, ..default() },
-            ));
+            if !e.command.eq("clear") {
+                console_text_history.text_vec.push(e.command.clone());
+                text.sections.push(TextSection::new(
+                    format!("\n{}", e.command),
+                    TextStyle { font_size: 20.0, ..default() },
+                ));
 
-            if console_text_history.text_vec.len() > 12 {
-                console_text_history.position -= 20.0;
-                style.top = Val::Px(console_text_history.position);
+                if console_text_history.text_vec.len() > 12 {
+                    console_text_history.position -= 20.0;
+                    style.top = Val::Px(console_text_history.position);
+                }
             }
         }
     }

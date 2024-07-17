@@ -158,7 +158,9 @@ impl Parser {
     }
 
     pub fn parse(mut self) -> AST {
-        if self.match_with_type(&[ TokenType::Spawn, TokenType::Quit ]) {
+        if self.match_with_type(&[
+            TokenType::Spawn, TokenType::Quit, TokenType::Clear
+        ]) {
             return self.parse_command();
         }
 

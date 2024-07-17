@@ -19,7 +19,7 @@ pub enum TokenType {
     Dot, Comma, Equals, True, False, Value,
 
     // Keywords
-    Spawn, Quit,
+    Spawn, Quit, Clear,
 
     EOF,
 }
@@ -40,6 +40,7 @@ impl Display for TokenType {
             Self::Value => "VALUE",
             Self::Spawn => "SPAWN",
             Self::Quit => "QUIT",
+            Self::Clear => "CLEAR",
             Self::EOF => "EOF",
         };
 

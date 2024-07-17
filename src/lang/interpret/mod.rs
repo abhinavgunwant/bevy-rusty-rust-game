@@ -1,8 +1,11 @@
 pub mod utils;
 
+use std::fs::File;
+
 use bevy::{ app::AppExit, prelude::* };
 
 use crate::{
+    CONSOLE_FILE,
     game::item::events::{ SpawnItemEvent, ItemToSpawn },
     lang::{
         parser::Parser, types::AST,
@@ -11,12 +14,16 @@ use crate::{
             get_string_param_value, get_f32_param_value,
         },
     },
+    ui::dev::console::components::ConsoleHistory,
 };
 
 pub fn interpret(
+    text: &mut Text,
+    console_text_history: &mut ConsoleHistory,
+    style: &mut Style,
     source: String,
     exit_event_writer: &mut EventWriter<AppExit>,
-    spawn_item_ew: &mut EventWriter<SpawnItemEvent>,
+    spawn_item_ew: &mut EventWriter<SpawnItemEvent>
 ) {
     let parser = Parser::new(source);
     let ast = parser.parse();
@@ -251,6 +258,23 @@ pub fn interpret(
 
                 "quit" => {
                     exit_event_writer.send(AppExit);
+                }
+
+                "clear" => {
+                    match File::create(CONSOLE_FILE) {
+                        Ok(_) => {
+                            console_text_history.text_vec.clear();
+                            text.sections.clear();
+                            style.top = Val::Px(0.0);
+                        }
+
+                        Err(e) => {
+                            println!(
+                                "There was some error while clearing console: {}",
+                                e
+                            );
+                        }
+                    }
                 }
 
                 _ => {

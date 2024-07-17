@@ -151,6 +151,13 @@ impl Scanner {
                 )
             }
 
+            "clear" => {
+                self.add_token_with_literal(
+                    TokenType::Clear,
+                    Literal::String(text)
+                )
+            }
+
             _ => {
                 self.add_token_with_literal(
                     TokenType::Identifier,
